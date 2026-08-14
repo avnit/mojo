@@ -109,3 +109,20 @@ __DATA__
 ## Want to know more?
 
   Take a look at our excellent [documentation](https://docs.mojolicious.org)!
+
+<!-- ARCH-DIAGRAM:START -->
+
+## Architecture
+
+> Auto-generated architecture diagram. See [`docs/context-map.md`](docs/context-map.md) for the full context map (core application, containers/cloud, and database connections).
+
+```mermaid
+flowchart TD
+  User([User / Client])
+  App["mojo"]
+  Img["Container image<br/>(Docker)"]
+  User --> App
+  App -.deploy.-> Img
+```
+
+<!-- ARCH-DIAGRAM:END -->
