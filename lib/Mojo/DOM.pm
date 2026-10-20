@@ -252,13 +252,15 @@ sub _content {
 
 sub _css { Mojo::DOM::CSS->new(tree => shift->tree) }
 
-sub _fragment { _link(my $r = ['root', @_], [@_]); $r }
+sub _fragment { _link(my $r = ['root', @_], [@_], 1); $r }
 
 sub _link {
-  my ($parent, $children) = @_;
+  my ($parent, $children, $fragment) = @_;
 
-  # Link parent to children
+  # Link parent to children (raw text is only allowed in script and style elements)
+  my $raw = $fragment || $parent->[0] eq 'tag' && ($parent->[1] eq 'script' || $parent->[1] eq 'style');
   for my $node (@$children) {
+    $node->[0] = 'text' if $node->[0] eq 'raw' && !$raw;
     my $offset = $node->[0] eq 'tag' ? 3 : 2;
     $node->[$offset] = $parent;
     weaken $node->[$offset];
@@ -401,7 +403,8 @@ Mojo::DOM - Minimalistic HTML/XML DOM parser with CSS selectors
 =head1 DESCRIPTION
 
 L<Mojo::DOM> is a minimalistic and relaxed HTML/XML DOM parser with CSS selector support. It will even try to interpret
-broken HTML and XML, so you should not use it for validation.
+broken HTML and XML, so you should not use it for validation or sanitization. Its interpretation of broken markup can
+differ from that of a web browser.
 
 =head1 NODES AND ELEMENTS
 
@@ -437,8 +440,8 @@ be lowercase as well.
   my $dom = Mojo::DOM->new('<P ID="greeting">Hi!</P>');
   say $dom->at('p[id]')->text;
 
-If an XML declaration is found, the parser will automatically switch into XML mode and everything becomes
-case-sensitive.
+If the document starts with an XML declaration, the parser will automatically switch into XML mode and everything
+becomes case-sensitive.
 
   # XML semantics
   my $dom = Mojo::DOM->new('<?xml version="1.0"?><P ID="greeting">Hi!</P>');
